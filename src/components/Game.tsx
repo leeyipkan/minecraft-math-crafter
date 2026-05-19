@@ -1,0 +1,372 @@
+import { useState, useEffect, useRef } from 'react';
+import type { GameResult } from '../App';
+
+interface GameProps {
+  onFinish: (result: GameResult) => void;
+  onCancel: () => void;
+}
+
+interface Question {
+  text: string;
+  answer: number;
+  type: 'COUNT' | 'ADD' | 'SUB';
+}
+
+const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [results, setResults] = useState<boolean[]>([]);
+  const [timer, setTimer] = useState(0);
+  const [totalTimer, setTotalTimer] = useState(0);
+  const [feedback, setFeedback] = useState<{ message: string; isCorrect: boolean } | null>(null);
+  const startTimeRef = useRef<number>(Date.now());
+  const sessionStartTimeRef = useRef<number>(Date.now());
+
+  useEffect(() => {
+    // Generate 5 questions
+    const generated: Question[] = [];
+    for (let i = 0; i < 5; i++) {
+      const type = Math.random() > 0.5 ? 'ADD' : 'SUB';
+      let a, b, ans;
+      if (type === 'ADD') {
+        a = Math.floor(Math.random() * 6) + 1;
+        b = Math.floor(Math.random() * 5) + 1;
+        ans = a + b;
+        generated.push({ text: `${a} + ${b} = ?`, answer: ans, type });
+      } else {
+        ans = Math.floor(Math.random() * 5) + 1;
+        b = Math.floor(Math.random() * 5) + 1;
+        a = ans + b;
+        generated.push({ text: `${a} - ${b} = ?`, answer: ans, type });
+      }
+    }
+    setQuestions(generated);
+    startTimeRef.current = Date.now();
+    sessionStartTimeRef.current = Date.now();
+    
+    const interval = setInterval(() => {
+      if (!feedback) {
+        setTimer(Math.floor((Date.now() - startTimeRef.current) / 1000));
+        setTotalTimer(Math.floor((Date.now() - sessionStartTimeRef.current) / 1000));
+      } else {
+        // Offset the start times while feedback is showing to "pause" the timer
+        startTimeRef.current += 1000 / 60; 
+        sessionStartTimeRef.current += 1000 / 60;
+      }
+    }, 1000 / 60);
+    
+    return () => clearInterval(interval);
+  }, [feedback]);
+
+  const [itemsInChest, setItemsInChest] = useState(0);
+
+  const handleSubmit = () => {
+    const currentQuestion = questions[currentQuestionIndex];
+    const correct = itemsInChest === currentQuestion.answer;
+    
+    if (correct) {
+      setFeedback({ message: 'CORRECT! GREAT JOB!', isCorrect: true });
+      // For correct answers, wait 1.5 seconds then auto-advance
+      setTimeout(() => {
+        handleNext(true);
+      }, 1500);
+    } else {
+      setFeedback({ message: `WRONG! THE CORRECT ANSWER WAS ${currentQuestion.answer}`, isCorrect: false });
+    }
+  };
+
+  const handleNext = (isCorrectOverride?: boolean) => {
+    const isCorrect = isCorrectOverride !== undefined ? isCorrectOverride : (feedback?.isCorrect ?? false);
+    const newResults = [...results, isCorrect];
+    setResults(newResults);
+    setFeedback(null);
+    
+    if (currentQuestionIndex < 4) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+      setItemsInChest(0);
+      startTimeRef.current = Date.now(); 
+      setTimer(0);
+    } else {
+      const finalScore = newResults.filter(r => r).length;
+      onFinish({
+        score: finalScore,
+        time: totalTimer,
+        questions: newResults
+      });
+    }
+  };
+
+  if (questions.length === 0) return <div>Loading...</div>;
+
+  const currentQuestion = questions[currentQuestionIndex];
+
+  return (
+    <div className="minecraft-panel" style={{ width: '95%', maxWidth: '800px', textAlign: 'center', position: 'relative' }}>
+      {/* Feedback Overlay - Only for WRONG answers now */}
+      {feedback && !feedback.isCorrect && (
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(0,0,0,0.85)',
+          zIndex: 10,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          borderRadius: '4px',
+          padding: '20px'
+        }}>
+          <h2 style={{ 
+            fontSize: '2.5rem', 
+            color: '#ff4444',
+            textShadow: '3px 3px #000',
+            marginBottom: '30px'
+          }}>
+            {feedback.message}
+          </h2>
+          <button className="minecraft-btn" onClick={() => handleNext(false)}>
+            CONTINUE
+          </button>
+        </div>
+      )}
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', color: '#555', fontSize: '0.8rem', alignItems: 'center' }}>
+        <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#888' }}>Total: {totalTimer}s</span>
+        
+        {/* Visual Progress Tracker */}
+        <div style={{ display: 'flex', gap: '5px' }}>
+          {[0, 1, 2, 3, 4].map(index => {
+            if (index < results.length) {
+              // Answered question
+              return (
+                <span key={index} style={{ fontSize: '1.2rem' }}>
+                  {results[index] ? '⭐' : '❌'}
+                </span>
+              );
+            } else {
+              // Unanswered question placeholder
+              return (
+                <span key={index} style={{ fontSize: '1.2rem', opacity: 0.3 }}>
+                  ⚪
+                </span>
+              );
+            }
+          })}
+        </div>
+
+        <span>Question {currentQuestionIndex + 1}/5</span>
+      </div>
+      
+      <div style={{ backgroundColor: '#333', padding: '20px', borderRadius: '8px', marginBottom: '20px', border: '4px solid #111' }}>
+        <h2 style={{ fontSize: '2.5rem', margin: 0, color: '#fff', textShadow: '2px 2px #000' }}>
+          {currentQuestion.text}
+        </h2>
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '30px', alignItems: 'stretch', marginBottom: '30px' }}>
+        {/* Item Source */}
+        <div style={{
+          width: '180px',
+          height: '180px',
+          backgroundColor: '#5ea243',
+          border: '5px solid #373737',
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignContent: 'start',
+          padding: '10px',
+          gap: '5px',
+          position: 'relative'
+        }}>
+          {[...Array(15 - itemsInChest)].map((_, i) => (
+            <div 
+              key={`source-${i}`}
+              onClick={() => setItemsInChest(prev => Math.min(prev + 1, 15))}
+              style={{
+                width: '28px',
+                height: '28px',
+                backgroundColor: '#8b8b8b',
+                border: '2px solid #fff',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.2rem'
+              }}
+            >
+              🍎
+            </div>
+          ))}
+          {[...Array(itemsInChest)].map((_, i) => (
+            <div 
+              key={`empty-${i}`}
+              style={{
+                width: '28px',
+                height: '28px',
+                backgroundColor: '#333',
+                border: '2px solid #222',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: 0.5
+              }}
+            >
+            </div>
+          ))}
+          <div style={{ 
+            position: 'absolute', 
+            bottom: '-30px', 
+            left: '0',
+            width: '100%', 
+            fontSize: '1rem', 
+            color: '#373737',
+            textAlign: 'center'
+          }}>
+            Apples: {15 - itemsInChest}
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '10px', alignItems: 'center' }}>
+          <div 
+            onClick={() => setItemsInChest(prev => Math.min(prev + 1, 15))}
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              width: '60px',
+              height: '60px',
+              backgroundColor: '#4a90e2', // Blue box
+              border: '4px solid #2a5a8e',
+              borderRadius: '8px',
+              fontSize: '2rem',
+              cursor: 'pointer',
+              boxShadow: '0 4px #2a5a8e',
+              transition: 'transform 0.1s',
+              color: 'white',
+              userSelect: 'none'
+            }}
+            onMouseDown={(e) => e.currentTarget.style.transform = 'translateY(2px)'}
+            onMouseUp={(e) => e.currentTarget.style.transform = 'translateY(0px)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0px)'}
+          >
+            ➡️
+          </div>
+
+          <div style={{ 
+            backgroundColor: '#333', 
+            color: '#fff', 
+            padding: '5px 10px', 
+            borderRadius: '4px', 
+            fontSize: '0.9rem',
+            fontFamily: 'monospace',
+            minWidth: '50px',
+            textAlign: 'center',
+            border: '2px solid #111'
+          }}>
+            {timer}s
+          </div>
+
+          <div 
+            onClick={() => setItemsInChest(prev => Math.max(prev - 1, 0))}
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              width: '60px',
+              height: '60px',
+              backgroundColor: '#e74c3c', // Red box
+              border: '4px solid #c0392b',
+              borderRadius: '8px',
+              fontSize: '2rem',
+              cursor: 'pointer',
+              boxShadow: '0 4px #c0392b',
+              transition: 'transform 0.1s',
+              color: 'white',
+              userSelect: 'none'
+            }}
+            onMouseDown={(e) => e.currentTarget.style.transform = 'translateY(2px)'}
+            onMouseUp={(e) => e.currentTarget.style.transform = 'translateY(0px)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0px)'}
+          >
+            ⬅️
+          </div>
+        </div>
+
+        {/* Chest */}
+        <div 
+          style={{
+            width: '180px',
+            height: '180px',
+            backgroundColor: '#866043',
+            border: '5px solid #373737',
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignContent: 'start',
+            padding: '10px',
+            gap: '5px',
+            position: 'relative'
+          }}
+        >
+          {[...Array(itemsInChest)].map((_, i) => (
+            <div 
+              key={i} 
+              onClick={() => setItemsInChest(prev => Math.max(prev - 1, 0))}
+              style={{ 
+                width: '28px', 
+                height: '28px', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                fontSize: '1.2rem',
+                cursor: 'pointer'
+              }}
+            >
+              🍎
+            </div>
+          ))}
+          <div style={{ 
+            position: 'absolute', 
+            bottom: '-30px', 
+            left: '0',
+            width: '100%', 
+            fontSize: '1rem', 
+            color: '#373737',
+            textAlign: 'center'
+          }}>
+            Chest: {itemsInChest}
+          </div>
+        </div>
+      </div>
+
+      {/* Inline Feedback for Correct Answers */}
+      <div style={{ height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
+        {feedback && feedback.isCorrect && (
+          <div style={{ 
+            color: '#56ad36', 
+            fontSize: '1.5rem', 
+            fontWeight: 'bold',
+            textShadow: '1px 1px #000'
+          }}>
+            {feedback.message}
+          </div>
+        )}
+      </div>
+
+      <button className="minecraft-btn" onClick={handleSubmit} disabled={!!feedback}>
+        DONE
+      </button>
+      
+      <button 
+        className="minecraft-btn" 
+        onClick={onCancel}
+        style={{ marginTop: '40px', fontSize: '0.8rem', backgroundColor: '#a33', display: 'block', margin: '40px auto 0' }}
+      >
+        QUIT
+      </button>
+    </div>
+  );
+};
+
+export default Game;

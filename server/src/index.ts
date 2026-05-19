@@ -1,0 +1,92 @@
+import express from 'express';
+import cors from 'cors';
+import fs from 'fs/promises';
+import path from 'path';
+
+const app = express();
+const PORT = process.env.PORT || 3001;
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// Data store for leaderboards
+interface LeaderboardEntry {
+  name: string;
+  score: number;
+  time: number;
+  date: string;
+}
+
+let leaderboard: LeaderboardEntry[] = [];
+const DATA_FILE = path.join(process.cwd(), 'leaderboard.json');
+
+// Load existing data from file
+const loadData = async () => {
+  try {
+    const data = await fs.readFile(DATA_FILE, 'utf-8');
+    leaderboard = JSON.parse(data);
+    console.log(`Loaded ${leaderboard.length} entries from storage.`);
+  } catch (err: any) {
+    if (err.code === 'ENOENT') {
+      console.log('No existing leaderboard found, starting fresh.');
+    } else {
+      console.error('Error loading leaderboard data:', err);
+    }
+  }
+};
+
+// Save data to file
+const saveData = async () => {
+  try {
+    await fs.writeFile(DATA_FILE, JSON.stringify(leaderboard, null, 2));
+  } catch (err) {
+    console.error('Error saving leaderboard data:', err);
+  }
+};
+
+// Routes
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'OK', message: 'Minecraft Math Crafter Server is running!' });
+});
+
+app.get('/api/leaderboard', (req, res) => {
+  res.json(leaderboard);
+});
+
+app.post('/api/leaderboard', async (req, res) => {
+  const entry: LeaderboardEntry = req.body;
+  
+  if (!entry.name || typeof entry.score !== 'number' || typeof entry.time !== 'number') {
+    return res.status(400).json({ error: 'Invalid leaderboard entry data' });
+  }
+
+  // Add date if not provided
+  if (!entry.date) {
+    entry.date = new Date().toISOString();
+  }
+
+  leaderboard.push(entry);
+  
+  // Sort by score (descending), then time (ascending)
+  leaderboard.sort((a, b) => {
+    if (b.score !== a.score) {
+      return b.score - a.score;
+    }
+    return a.time - b.time;
+  });
+
+  // Keep top 100
+  leaderboard = leaderboard.slice(0, 100);
+
+  // Persist the updated leaderboard to disk
+  await saveData();
+
+  res.status(201).json({ message: 'Entry added successfully', entry });
+});
+
+// Start the server
+app.listen(PORT, async () => {
+  await loadData();
+  console.log(`Server is running on http://localhost:${PORT}`);
+});

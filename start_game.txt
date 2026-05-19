@@ -1,0 +1,25 @@
+  Step 1: Start the "Backend" (The Server)
+  The "backend" for this game is a lightweight development server that provides the game files to your browser.
+
+   1. Open PowerShell or your Command Prompt.
+   2. Type these commands and press Enter:
+
+   1     cd C:\Users\user\minecraft-math-crafter
+   2     npm.cmd run dev
+   3. Keep that terminal window open. If you close it, the game will stop working.
+
+  Step 2: Open the Game in your Browser
+  Once the terminal says "ready", open your browser (Edge or Chrome) and go to:
+  http://localhost:5173/ (http://localhost:5173/)
+
+  (Note: If the terminal says "Port 5173 is in use, trying 5174", use localhost:5174 instead.)
+
+  Summary of Game Mechanics:
+   * The Goal: Answer 10 math questions.
+   * How to Play: Click the Apples (🍎) on the left to add them to the Chest. Click the Chest if you want to empty it and start over.
+   * Submit: Click DONE once the chest has the correct number of apples.
+   * Leaderboard: After 10 questions, enter your son's name to save his time and score. You can see the top 10 players by clicking "LEADERBOARD" on the main menu.
+
+  The game uses Local Storage, meaning all the names and high scores are saved directly in your browser on your computer.
+
+  Have fun crafting some math! 🍎⚒️
