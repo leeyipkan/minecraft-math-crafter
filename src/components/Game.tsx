@@ -52,30 +52,29 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
         const a = answer + b;
         text = `${a} - ${b} = ?`;
       } else if (i === 2) {
-        // Level 3: e.g., 7 + ? = 9
+        // Level 3: e.g., 7 + ? = 13 (Answer is 6) - Adjusted to need larger values!
         type = 'ADD';
-        answer = Math.floor(Math.random() * 8) + 1; // 1 to 8 (The missing value)
-        const a = Math.floor(Math.random() * (9 - answer)) + 1;
-        const c = a + answer; // The result
+        answer = Math.floor(Math.random() * 6) + 5; // 5 to 10 (To utilize more apples)
+        const a = Math.floor(Math.random() * 5) + 5; // 5 to 9
+        const c = a + answer; // Result 10 to 19
         text = `${a} + ? = ${c}`;
       } else if (i === 3) {
-        // Level 4: e.g., 8 - ? = 3
+        // Level 4: e.g., 18 - ? = 6 (Answer is 12)
         type = 'SUB';
-        answer = Math.floor(Math.random() * 8) + 1; // 1 to 8 (The missing value)
-        const c = Math.floor(Math.random() * 8) + 1;
+        answer = Math.floor(Math.random() * 6) + 10; // 10 to 15 (Force large apple use)
+        const c = Math.floor(Math.random() * 5) + 3; // 3 to 7
         const a = c + answer;
         text = `${a} - ? = ${c}`;
       } else if (i === 4) {
-        // Level 5: e.g., 13 - ? = 11 or 11 + ? = 13
+        // Level 5: Mix of higher missing values
         type = Math.random() > 0.5 ? 'ADD' : 'SUB';
+        answer = Math.floor(Math.random() * 6) + 11; // 11 to 16 (Max out the chest)
         if (type === 'ADD') {
-          answer = Math.floor(Math.random() * 5) + 1; // 1 to 5 (The missing value)
-          const a = Math.floor(Math.random() * 5) + 10; // 10 to 14
+          const a = Math.floor(Math.random() * 4) + 1; // 1 to 4
           const c = a + answer;
           text = `${a} + ? = ${c}`;
         } else {
-          answer = Math.floor(Math.random() * 5) + 1; // 1 to 5 (The missing value)
-          const c = Math.floor(Math.random() * 5) + 10; // 10 to 14
+          const c = Math.floor(Math.random() * 4) + 1; // 1 to 4
           const a = c + answer;
           text = `${a} - ? = ${c}`;
         }
@@ -143,9 +142,20 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
 
   const currentQuestion = questions[currentQuestionIndex];
 
+  const maxCapacity = 16;
+  const sourceValue = maxCapacity - itemsInChest;
+  const sourceLarge = Math.floor(sourceValue / 10);
+  const sourceSmall = sourceValue % 10;
+  const sourceEmpty = 16 - (sourceLarge * 4 + sourceSmall);
+
+  const chestValue = itemsInChest;
+  const chestLarge = Math.floor(chestValue / 10);
+  const chestSmall = chestValue % 10;
+  const chestEmpty = 16 - (chestLarge * 4 + chestSmall);
+
   return (
     <div className="minecraft-panel" style={{ width: '95%', maxWidth: '800px', textAlign: 'center', position: 'relative' }}>
-      {/* Feedback Overlay - Only for WRONG answers now */}
+      {/* Feedback Overlay */}
       {feedback && !feedback.isCorrect && (
         <div style={{
           position: 'absolute',
@@ -183,14 +193,12 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
         <div style={{ display: 'flex', gap: '5px' }}>
           {[0, 1, 2, 3, 4].map(index => {
             if (index < results.length) {
-              // Answered question
               return (
                 <span key={index} style={{ fontSize: '1.2rem' }}>
                   {results[index] ? '⭐' : '❌'}
                 </span>
               );
             } else {
-              // Unanswered question placeholder
               return (
                 <span key={index} style={{ fontSize: '1.2rem', opacity: 0.3 }}>
                   ⚪
@@ -216,44 +224,61 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
           height: '180px',
           backgroundColor: '#5ea243',
           border: '5px solid #373737',
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignContent: 'start',
-          padding: '10px',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 32px)',
+          gridTemplateRows: 'repeat(4, 32px)',
           gap: '5px',
-          position: 'relative'
+          padding: '10px',
+          position: 'relative',
+          gridAutoFlow: 'row dense',
+          boxSizing: 'border-box'
         }}>
-          {[...Array(15 - itemsInChest)].map((_, i) => (
+          {[...Array(sourceLarge)].map((_, i) => (
             <div 
-              key={`source-${i}`}
-              onClick={() => setItemsInChest(prev => Math.min(prev + 1, 15))}
+              key={`src-large-${i}`}
+              onClick={() => setItemsInChest(prev => Math.min(prev + 10, maxCapacity))}
               style={{
-                width: '28px',
-                height: '28px',
+                gridColumn: 'span 2',
+                gridRow: 'span 2',
                 backgroundColor: '#8b8b8b',
                 border: '2px solid #fff',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '1.2rem'
+                fontSize: '3.5rem',
+                boxSizing: 'border-box'
               }}
             >
               🍎
             </div>
           ))}
-          {[...Array(itemsInChest)].map((_, i) => (
+          {[...Array(sourceSmall)].map((_, i) => (
             <div 
-              key={`empty-${i}`}
+              key={`src-small-${i}`}
+              onClick={() => setItemsInChest(prev => Math.min(prev + 1, maxCapacity))}
               style={{
-                width: '28px',
-                height: '28px',
-                backgroundColor: '#333',
-                border: '2px solid #222',
+                backgroundColor: '#8b8b8b',
+                border: '2px solid #fff',
+                cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                opacity: 0.5
+                fontSize: '1.2rem',
+                boxSizing: 'border-box'
+              }}
+            >
+              🍎
+            </div>
+          ))}
+          {[...Array(sourceEmpty)].map((_, i) => (
+            <div 
+              key={`src-empty-${i}`}
+              style={{
+                backgroundColor: '#333',
+                border: '2px solid #222',
+                opacity: 0.5,
+                boxSizing: 'border-box'
               }}
             >
             </div>
@@ -265,9 +290,10 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
             width: '100%', 
             fontSize: '1rem', 
             color: '#373737',
-            textAlign: 'center'
+            textAlign: 'center',
+            whiteSpace: 'nowrap'
           }}>
-            Apples: {15 - itemsInChest}
+            Apples: {sourceValue}
           </div>
         </div>
 
@@ -344,29 +370,57 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
             height: '180px',
             backgroundColor: '#866043',
             border: '5px solid #373737',
-            display: 'flex',
-            flexWrap: 'wrap',
-            alignContent: 'start',
-            padding: '10px',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 32px)',
+            gridTemplateRows: 'repeat(4, 32px)',
             gap: '5px',
-            position: 'relative'
+            padding: '10px',
+            position: 'relative',
+            gridAutoFlow: 'row dense',
+            boxSizing: 'border-box'
           }}
         >
-          {[...Array(itemsInChest)].map((_, i) => (
+          {[...Array(chestLarge)].map((_, i) => (
             <div 
-              key={i} 
+              key={`chest-large-${i}`}
+              onClick={() => setItemsInChest(prev => Math.max(prev - 10, 0))}
+              style={{ 
+                gridColumn: 'span 2',
+                gridRow: 'span 2',
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                fontSize: '3.5rem',
+                cursor: 'pointer',
+                boxSizing: 'border-box'
+              }}
+            >
+              🍎
+            </div>
+          ))}
+          {[...Array(chestSmall)].map((_, i) => (
+            <div 
+              key={`chest-small-${i}`}
               onClick={() => setItemsInChest(prev => Math.max(prev - 1, 0))}
               style={{ 
-                width: '28px', 
-                height: '28px', 
                 display: 'flex', 
                 alignItems: 'center', 
                 justifyContent: 'center', 
                 fontSize: '1.2rem',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                boxSizing: 'border-box'
               }}
             >
               🍎
+            </div>
+          ))}
+          {[...Array(chestEmpty)].map((_, i) => (
+            <div 
+              key={`chest-empty-${i}`}
+              style={{
+                boxSizing: 'border-box'
+              }}
+            >
             </div>
           ))}
           <div style={{ 
@@ -376,9 +430,10 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
             width: '100%', 
             fontSize: '1rem', 
             color: '#373737',
-            textAlign: 'center'
+            textAlign: 'center',
+            whiteSpace: 'nowrap'
           }}>
-            Chest: {itemsInChest}
+            Chest: {chestValue}
           </div>
         </div>
       </div>
@@ -390,46 +445,6 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
             color: '#56ad36', 
             fontSize: '1.5rem', 
             fontWeight: 'bold',
-            textShadow: '1px 1px #000'
-          }}>
-            {feedback.message}
-          </div>
-        )}
-      </div>
-
-      <button className="minecraft-btn" onClick={handleSubmit} disabled={!!feedback}>
-        Submit
-      </button>
-      
-      <button 
-        className="minecraft-btn" 
-        onClick={onCancel}
-        style={{ marginTop: '40px', fontSize: '0.8rem', backgroundColor: '#a33', display: 'block', margin: '40px auto 0' }}
-      >
-        QUIT
-      </button>
-    </div>
-  );
-};
-
-export default Game;
-button className="minecraft-btn" onClick={handleSubmit} disabled={!!feedback}>
-        Submit
-      </button>
-      
-      <button 
-        className="minecraft-btn" 
-        onClick={onCancel}
-        style={{ marginTop: '40px', fontSize: '0.8rem', backgroundColor: '#a33', display: 'block', margin: '40px auto 0' }}
-      >
-        QUIT
-      </button>
-    </div>
-  );
-};
-
-export default Game;
-eight: 'bold',
             textShadow: '1px 1px #000'
           }}>
             {feedback.message}
