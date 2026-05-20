@@ -23,22 +23,65 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
   const sessionStartTimeRef = useRef<number>(Date.now());
 
   useEffect(() => {
-    // Generate 5 questions
+    // Generate 5 questions with increasing difficulty (Levels)
     const generated: Question[] = [];
     for (let i = 0; i < 5; i++) {
-      const type = Math.random() > 0.5 ? 'ADD' : 'SUB';
-      let a, b, ans;
-      if (type === 'ADD') {
-        a = Math.floor(Math.random() * 6) + 1;
-        b = Math.floor(Math.random() * 5) + 1;
-        ans = a + b;
-        generated.push({ text: `${a} + ${b} = ?`, answer: ans, type });
-      } else {
-        ans = Math.floor(Math.random() * 5) + 1;
-        b = Math.floor(Math.random() * 5) + 1;
-        a = ans + b;
-        generated.push({ text: `${a} - ${b} = ?`, answer: ans, type });
+      let type: 'ADD' | 'SUB' = Math.random() > 0.5 ? 'ADD' : 'SUB';
+      let text = '';
+      let answer = 0;
+      
+      if (i === 0) {
+        // Level 1: 2 single digit addition or subtraction, result is single digit
+        if (type === 'ADD') {
+          answer = Math.floor(Math.random() * 8) + 2; // 2 to 9
+          const a = Math.floor(Math.random() * (answer - 1)) + 1;
+          const b = answer - a;
+          text = `${a} + ${b} = ?`;
+        } else {
+          const a = Math.floor(Math.random() * 8) + 2; // 2 to 9
+          const b = Math.floor(Math.random() * (a - 1)) + 1;
+          answer = a - b;
+          text = `${a} - ${b} = ?`;
+        }
+      } else if (i === 1) {
+        // Level 2: 2 digit number subtraction 1 digit number, result is 1 digit
+        type = 'SUB';
+        answer = Math.floor(Math.random() * 9) + 1; // 1 to 9
+        const minB = Math.max(1, 10 - answer);
+        const b = Math.floor(Math.random() * (9 - minB + 1)) + minB;
+        const a = answer + b;
+        text = `${a} - ${b} = ?`;
+      } else if (i === 2) {
+        // Level 3: e.g., 7 + ? = 9
+        type = 'ADD';
+        answer = Math.floor(Math.random() * 8) + 1; // 1 to 8 (The missing value)
+        const a = Math.floor(Math.random() * (9 - answer)) + 1;
+        const c = a + answer; // The result
+        text = `${a} + ? = ${c}`;
+      } else if (i === 3) {
+        // Level 4: e.g., 8 - ? = 3
+        type = 'SUB';
+        answer = Math.floor(Math.random() * 8) + 1; // 1 to 8 (The missing value)
+        const c = Math.floor(Math.random() * 8) + 1;
+        const a = c + answer;
+        text = `${a} - ? = ${c}`;
+      } else if (i === 4) {
+        // Level 5: e.g., 13 - ? = 11 or 11 + ? = 13
+        type = Math.random() > 0.5 ? 'ADD' : 'SUB';
+        if (type === 'ADD') {
+          answer = Math.floor(Math.random() * 5) + 1; // 1 to 5 (The missing value)
+          const a = Math.floor(Math.random() * 5) + 10; // 10 to 14
+          const c = a + answer;
+          text = `${a} + ? = ${c}`;
+        } else {
+          answer = Math.floor(Math.random() * 5) + 1; // 1 to 5 (The missing value)
+          const c = Math.floor(Math.random() * 5) + 10; // 10 to 14
+          const a = c + answer;
+          text = `${a} - ? = ${c}`;
+        }
       }
+      
+      generated.push({ text, answer, type });
     }
     setQuestions(generated);
     startTimeRef.current = Date.now();
@@ -157,7 +200,7 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
           })}
         </div>
 
-        <span>Question {currentQuestionIndex + 1}/5</span>
+        <span>Level {currentQuestionIndex + 1}</span>
       </div>
       
       <div style={{ backgroundColor: '#333', padding: '20px', borderRadius: '8px', marginBottom: '20px', border: '4px solid #111' }}>
@@ -355,7 +398,7 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
       </div>
 
       <button className="minecraft-btn" onClick={handleSubmit} disabled={!!feedback}>
-        DONE
+        Submit
       </button>
       
       <button 
