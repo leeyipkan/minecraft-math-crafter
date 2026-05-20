@@ -273,7 +273,7 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
 
         <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '10px', alignItems: 'center' }}>
           <div 
-            onClick={() => setItemsInChest(prev => Math.min(prev + 1, 15))}
+            onClick={() => setItemsInChest(prev => Math.min(prev + 1, maxCapacity))}
             style={{ 
               display: 'flex', 
               alignItems: 'center', 
@@ -390,6 +390,46 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
             color: '#56ad36', 
             fontSize: '1.5rem', 
             fontWeight: 'bold',
+            textShadow: '1px 1px #000'
+          }}>
+            {feedback.message}
+          </div>
+        )}
+      </div>
+
+      <button className="minecraft-btn" onClick={handleSubmit} disabled={!!feedback}>
+        Submit
+      </button>
+      
+      <button 
+        className="minecraft-btn" 
+        onClick={onCancel}
+        style={{ marginTop: '40px', fontSize: '0.8rem', backgroundColor: '#a33', display: 'block', margin: '40px auto 0' }}
+      >
+        QUIT
+      </button>
+    </div>
+  );
+};
+
+export default Game;
+button className="minecraft-btn" onClick={handleSubmit} disabled={!!feedback}>
+        Submit
+      </button>
+      
+      <button 
+        className="minecraft-btn" 
+        onClick={onCancel}
+        style={{ marginTop: '40px', fontSize: '0.8rem', backgroundColor: '#a33', display: 'block', margin: '40px auto 0' }}
+      >
+        QUIT
+      </button>
+    </div>
+  );
+};
+
+export default Game;
+eight: 'bold',
             textShadow: '1px 1px #000'
           }}>
             {feedback.message}
