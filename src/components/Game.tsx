@@ -176,10 +176,11 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
 
   const currentQuestion = questions[currentQuestionIndex];
 
-  const maxCapacity = 20; // Expanded to 5x4
+  const maxCapacity = 24; // Expanded to 6x4
   const sourceValue = maxCapacity - itemsInChest;
   const sourceLarge = Math.floor(sourceValue / 10);
   const sourceSmall = sourceValue % 10;
+  // A large apple takes up 4 grid slots (2x2).
   const sourceEmpty = maxCapacity - (sourceLarge * 4 + sourceSmall);
 
   const chestValue = itemsInChest;
@@ -254,12 +255,12 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
       <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', alignItems: 'stretch', marginBottom: '30px' }}>
         {/* Item Source */}
         <div style={{
-          width: '215px', // Accommodates 5 columns (5 * 32px + 4 * 5px gap + 20px padding)
+          width: '247px', // Accommodates 6 columns (6 * 32px + 5 * 5px gap + 20px padding + 10px borders)
           height: '180px',
           backgroundColor: '#5ea243',
           border: '5px solid #373737',
           display: 'grid',
-          gridTemplateColumns: 'repeat(5, 32px)',
+          gridTemplateColumns: 'repeat(6, 32px)',
           gridTemplateRows: 'repeat(4, 32px)',
           gap: '5px',
           padding: '10px',
@@ -400,12 +401,12 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
         {/* Chest */}
         <div 
           style={{
-            width: '215px', // Accommodates 5 columns
+            width: '247px', // Accommodates 6 columns
             height: '180px',
             backgroundColor: '#866043',
             border: '5px solid #373737',
             display: 'grid',
-            gridTemplateColumns: 'repeat(5, 32px)',
+            gridTemplateColumns: 'repeat(6, 32px)',
             gridTemplateRows: 'repeat(4, 32px)',
             gap: '5px',
             padding: '10px',
@@ -452,6 +453,9 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
             <div 
               key={`chest-empty-${i}`}
               style={{
+                backgroundColor: '#000',
+                border: '2px solid #222',
+                opacity: 0.2,
                 boxSizing: 'border-box'
               }}
             >
@@ -489,19 +493,19 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
         <button 
           className="minecraft-btn" 
+          onClick={onCancel}
+          style={{ backgroundColor: '#a33', width: '150px' }}
+        >
+          QUIT
+        </button>
+
+        <button 
+          className="minecraft-btn" 
           onClick={handleSubmit} 
           disabled={!!feedback}
           style={{ width: '150px' }}
         >
           Submit
-        </button>
-        
-        <button 
-          className="minecraft-btn" 
-          onClick={onCancel}
-          style={{ backgroundColor: '#a33', width: '150px' }}
-        >
-          QUIT
         </button>
       </div>
     </div>
