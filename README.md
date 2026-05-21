@@ -1,73 +1,48 @@
-# React + TypeScript + Vite
+# Minecraft Math Crafter 🍎⛏️
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An interactive, educational math game explicitly designed for 6-year-olds. Built with a familiar "Minecraft" pixel aesthetic, this game helps children practice basic addition, subtraction, and introductory algebraic thinking (finding missing numbers) without requiring keyboard typing skills.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+*   **Visual Counting Mechanic:** Kids solve math problems by moving apples between the "Apple Tree" (source) and their "Chest" (target).
+*   **Place Value Teaching:** Uses "Large Apples" (worth 10) and "Small Apples" (worth 1) to visually teach groupings for numbers greater than 10.
+*   **Intuitive Controls:** Players can click individual apples to move them back and forth, or use the central Blue (➡️) and Red (⬅️) control boxes.
+*   **Progressive Difficulty:** A quick 5-question game loop that increases in difficulty per level:
+    *   *Level 1:* Simple single-digit addition/subtraction.
+    *   *Level 2:* Two-digit minus one-digit subtraction.
+    *   *Level 3 & 4:* Missing numbers in addition and subtraction (e.g., `7 + ? = 13`).
+    *   *Level 5:* Randomized missing numbers with higher base values.
+*   **Instant Feedback System:**
+    *   **Correct Answers:** Displays an encouraging green inline message and automatically advances after 1.5 seconds.
+    *   **Incorrect Answers:** Displays a red overlay showing the correct answer to ensure the child learns from the mistake before continuing.
+*   **Visual Progress Tracker:** A top-screen UI tracking correct (⭐) and incorrect (❌) answers for the current session.
+*   **Dual Timers:** Tracks both the time spent on the current question and the total time elapsed for the entire session.
+*   **Persistent Leaderboard:** A fully functional Node.js/Express backend that persists high scores to a local `leaderboard.json` file.
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+*   **Frontend:** React 18, TypeScript, Vite, Vanilla CSS (CSS Grid/Flexbox).
+*   **Backend:** Node.js, Express, TypeScript (`tsx`), Local file system storage.
 
-## Expanding the ESLint configuration
+## How to Run Locally
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+This project requires two active terminal sessions to run both the frontend game and the backend leaderboard API.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 1. Start the Backend API
+Navigate to the `server` directory, install dependencies, and start the development server:
+```bash
+cd server
+npm install
+npm run dev
 ```
+*The backend API will run on `http://localhost:3001`*
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 2. Start the Frontend Game
+In a new terminal window at the project root, install dependencies and start Vite:
+```bash
+npm install
+npm run dev
 ```
+*The frontend game will run on `http://localhost:5173`*
+
+Open your browser to `http://localhost:5173` to play!

@@ -459,7 +459,7 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
       <button 
         className="minecraft-btn" 
         onClick={onCancel}
-        style={{ marginTop: '40px', fontSize: '0.8rem', backgroundColor: '#a33', display: 'block', margin: '40px auto 0' }}
+        style={{ backgroundColor: '#a33', display: 'block', margin: '40px auto 0' }}
       >
         QUIT
       </button>
