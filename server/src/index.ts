@@ -21,11 +21,36 @@ interface LeaderboardEntry {
 let leaderboard: LeaderboardEntry[] = [];
 const DATA_FILE = path.join(process.cwd(), 'leaderboard.json');
 
+// Save data to file
+const saveData = async () => {
+  try {
+    await fs.writeFile(DATA_FILE, JSON.stringify(leaderboard, null, 2));
+  } catch (err) {
+    console.error('Error saving leaderboard data:', err);
+  }
+};
+
 // Load existing data from file
 const loadData = async () => {
   try {
     const data = await fs.readFile(DATA_FILE, 'utf-8');
-    leaderboard = JSON.parse(data);
+    const parsedData = JSON.parse(data);
+    
+    // Filter out records older than 2 days (48 hours)
+    const now = Date.now();
+    const twoDaysInMs = 2 * 24 * 60 * 60 * 1000;
+    
+    leaderboard = parsedData.filter((entry: LeaderboardEntry) => {
+      if (!entry.date) return false;
+      const entryTime = new Date(entry.date).getTime();
+      return (now - entryTime) <= twoDaysInMs;
+    });
+
+    if (leaderboard.length < parsedData.length) {
+      console.log(`Removed ${parsedData.length - leaderboard.length} records older than 2 days.`);
+      await saveData();
+    }
+
     console.log(`Loaded ${leaderboard.length} entries from storage.`);
   } catch (err: any) {
     if (err.code === 'ENOENT') {
@@ -33,15 +58,6 @@ const loadData = async () => {
     } else {
       console.error('Error loading leaderboard data:', err);
     }
-  }
-};
-
-// Save data to file
-const saveData = async () => {
-  try {
-    await fs.writeFile(DATA_FILE, JSON.stringify(leaderboard, null, 2));
-  } catch (err) {
-    console.error('Error saving leaderboard data:', err);
   }
 };
 
@@ -59,6 +75,11 @@ app.post('/api/leaderboard', async (req, res) => {
   
   if (!entry.name || typeof entry.score !== 'number' || typeof entry.time !== 'number') {
     return res.status(400).json({ error: 'Invalid leaderboard entry data' });
+  }
+
+  // Only allow scores > 3
+  if (entry.score <= 3) {
+    return res.status(400).json({ error: 'Score must be higher than 3 to be recorded.' });
   }
 
   // Add date if not provided

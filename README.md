@@ -9,15 +9,17 @@ An interactive, educational math game explicitly designed for 6-year-olds. Built
 *   **Intuitive Controls:** Players can click individual apples to move them back and forth, or use the central Blue (➡️) and Red (⬅️) control boxes.
 *   **Progressive Difficulty:** A quick 5-question game loop that increases in difficulty per level:
     *   *Level 1:* Simple single-digit addition/subtraction.
-    *   *Level 2:* Two-digit minus one-digit subtraction.
-    *   *Level 3 & 4:* Missing numbers in addition and subtraction (e.g., `7 + ? = 13`).
+    *   *Level 2:* Addition and subtraction with three single-digit numbers (e.g., `4 + 3 - 2 = ?`).
+    *   *Level 3:* Subtracting a single-digit number from a teen number (10-19), resulting in a single digit (e.g., `14 - 6 = ?`).
+    *   *Level 4:* Missing numbers in subtraction (e.g., `18 - ? = 6`).
     *   *Level 5:* Randomized missing numbers with higher base values.
 *   **Instant Feedback System:**
     *   **Correct Answers:** Displays an encouraging green inline message and automatically advances after 1.5 seconds.
     *   **Incorrect Answers:** Displays a red overlay showing the correct answer to ensure the child learns from the mistake before continuing.
 *   **Visual Progress Tracker:** A top-screen UI tracking correct (⭐) and incorrect (❌) answers for the current session.
 *   **Dual Timers:** Tracks both the time spent on the current question and the total time elapsed for the entire session.
-*   **Persistent Leaderboard:** A fully functional Node.js/Express backend that persists high scores to a local `leaderboard.json` file.
+*   **Persistent Leaderboard:** A fully functional Node.js/Express backend that persists high scores to a local `leaderboard.json` file. 
+    *   *Note:* Players must score at least 4 out of 5 correct answers to record their name on the leaderboard.
 
 ## Tech Stack
 

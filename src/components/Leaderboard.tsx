@@ -36,7 +36,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ onBack }) => {
   }, []);
 
   return (
-    <div className="minecraft-panel" style={{ width: '90%', maxWidth: '600px', textAlign: 'center' }}>
+    <div className="minecraft-panel" style={{ width: '95%', maxWidth: '800px', textAlign: 'center' }}>
       <h2 style={{ fontSize: '2rem', marginBottom: '20px' }}>TOP SCORES</h2>
       
       {loading ? (
@@ -50,6 +50,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ onBack }) => {
               <th style={{ padding: '10px' }}>NAME</th>
               <th style={{ padding: '10px' }}>SCORE</th>
               <th style={{ padding: '10px' }}>TIME</th>
+              <th style={{ padding: '10px' }}>DATE</th>
             </tr>
           </thead>
           <tbody>
@@ -58,6 +59,9 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ onBack }) => {
                 <td style={{ padding: '10px' }}>{record.name}</td>
                 <td style={{ padding: '10px' }}>{record.score}/5</td>
                 <td style={{ padding: '10px' }}>{record.time}s</td>
+                <td style={{ padding: '10px', fontSize: '0.8rem' }}>
+                  {new Date(record.date).toISOString().split('T')[0]}
+                </td>
               </tr>
             ))}
           </tbody>

@@ -14,18 +14,22 @@ const MainMenu: React.FC<MainMenuProps> = ({ onStart, onLeaderboard }) => {
         textShadow: '4px 4px #000',
         color: '#56ad36'
       }}>
-        MINECRAFT<br/>MATH CRAFTER
+        RDR2GTA6
       </h1>
-      <button className="minecraft-btn" onClick={onStart}>
-        PLAY
-      </button>
-      <div style={{ marginTop: '20px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
+        <button 
+          className="minecraft-btn" 
+          onClick={onStart}
+          style={{ width: '300px' }}
+        >
+          PLAY RDR2
+        </button>
         <button 
           className="minecraft-btn" 
           onClick={onLeaderboard}
-          style={{ fontSize: '1rem', backgroundColor: '#555' }}
+          style={{ width: '300px', backgroundColor: '#555' }}
         >
-          LEADERBOARD
+          Who is the leader
         </button>
       </div>
     </div>

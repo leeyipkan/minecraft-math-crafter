@@ -44,20 +44,54 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
           text = `${a} - ${b} = ?`;
         }
       } else if (i === 1) {
-        // Level 2: 2 digit number subtraction 1 digit number, result is 1 digit
-        type = 'SUB';
-        answer = Math.floor(Math.random() * 9) + 1; // 1 to 9
-        const minB = Math.max(1, 10 - answer);
-        const b = Math.floor(Math.random() * (9 - minB + 1)) + minB;
-        const a = answer + b;
-        text = `${a} - ${b} = ?`;
+        // Level 2: Simple addition and subtraction by 3 single digit numbers, result is single digit
+        const subType = Math.floor(Math.random() * 3);
+        if (subType === 0) { // a + b + c
+          type = 'ADD';
+          answer = Math.floor(Math.random() * 7) + 3; // 3 to 9
+          const a = Math.floor(Math.random() * (answer - 2)) + 1;
+          const b = Math.floor(Math.random() * (answer - a - 1)) + 1;
+          const c = answer - a - b;
+          text = `${a} + ${b} + ${c} = ?`;
+        } else if (subType === 1) { // a + b - c
+          type = 'ADD';
+          const a = Math.floor(Math.random() * 5) + 1; // 1 to 5
+          const b = Math.floor(Math.random() * 4) + 1; // 1 to 4
+          const c = Math.floor(Math.random() * (a + b - 1)) + 1;
+          answer = a + b - c;
+          text = `${a} + ${b} - ${c} = ?`;
+        } else { // a - b - c
+          type = 'SUB';
+          const a = Math.floor(Math.random() * 4) + 6; // 6 to 9
+          const b = Math.floor(Math.random() * 3) + 1; // 1 to 3
+          const c = Math.floor(Math.random() * (a - b - 1)) + 1;
+          answer = a - b - c;
+          text = `${a} - ${b} - ${c} = ?`;
+        }
       } else if (i === 2) {
-        // Level 3: e.g., 7 + ? = 13 (Answer is 6) - Adjusted to need larger values!
-        type = 'ADD';
-        answer = Math.floor(Math.random() * 6) + 5; // 5 to 10 (To utilize more apples)
-        const a = Math.floor(Math.random() * 5) + 5; // 5 to 9
-        const c = a + answer; // Result 10 to 19
-        text = `${a} + ? = ${c}`;
+        // Level 3: First number 10-19, second number single digit, result single digit (Forces subtraction)
+        type = 'SUB';
+        answer = Math.floor(Math.random() * 9) + 1; // Result: 1 to 9
+        const a = Math.floor(Math.random() * 10) + 10; // First number: 10 to 19
+        const b = a - answer; // Second number
+        
+        // Ensure b is a single digit (1-9). 
+        // If a is 19 and answer is 9, b is 10 (invalid).
+        // To strictly follow the rule, let's derive it from a valid b instead.
+        const validB = Math.floor(Math.random() * 9) + 1; // 1 to 9
+        const validAnswer = Math.floor(Math.random() * 9) + 1; // 1 to 9
+        const validA = validB + validAnswer; // 2 to 18
+        
+        if (validA >= 10) {
+           answer = validAnswer;
+           text = `${validA} - ${validB} = ?`;
+        } else {
+           // Fallback to ensure A is at least 10
+           const safeB = Math.floor(Math.random() * (9 - (10 - validAnswer))) + (10 - validAnswer);
+           const safeA = safeB + validAnswer;
+           answer = validAnswer;
+           text = `${safeA} - ${safeB} = ?`;
+        }
       } else if (i === 3) {
         // Level 4: e.g., 18 - ? = 6 (Answer is 12)
         type = 'SUB';
@@ -142,19 +176,19 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
 
   const currentQuestion = questions[currentQuestionIndex];
 
-  const maxCapacity = 16;
+  const maxCapacity = 20; // Expanded to 5x4
   const sourceValue = maxCapacity - itemsInChest;
   const sourceLarge = Math.floor(sourceValue / 10);
   const sourceSmall = sourceValue % 10;
-  const sourceEmpty = 16 - (sourceLarge * 4 + sourceSmall);
+  const sourceEmpty = maxCapacity - (sourceLarge * 4 + sourceSmall);
 
   const chestValue = itemsInChest;
   const chestLarge = Math.floor(chestValue / 10);
   const chestSmall = chestValue % 10;
-  const chestEmpty = 16 - (chestLarge * 4 + chestSmall);
+  const chestEmpty = maxCapacity - (chestLarge * 4 + chestSmall);
 
   return (
-    <div className="minecraft-panel" style={{ width: '95%', maxWidth: '800px', textAlign: 'center', position: 'relative' }}>
+    <div className="minecraft-panel" style={{ width: '95%', maxWidth: '1000px', padding: '40px', textAlign: 'center', position: 'relative' }}>
       {/* Feedback Overlay */}
       {feedback && !feedback.isCorrect && (
         <div style={{
@@ -186,21 +220,21 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
         </div>
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', color: '#555', fontSize: '0.8rem', alignItems: 'center' }}>
-        <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#888' }}>Total: {totalTimer}s</span>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', color: '#555', alignItems: 'center' }}>
+        <span style={{ fontSize: '26px', fontWeight: 'bold', color: '#888' }}>Total: {totalTimer}s</span>
         
         {/* Visual Progress Tracker */}
         <div style={{ display: 'flex', gap: '5px' }}>
           {[0, 1, 2, 3, 4].map(index => {
             if (index < results.length) {
               return (
-                <span key={index} style={{ fontSize: '1.2rem' }}>
+                <span key={index} style={{ fontSize: '1.5rem' }}>
                   {results[index] ? '⭐' : '❌'}
                 </span>
               );
             } else {
               return (
-                <span key={index} style={{ fontSize: '1.2rem', opacity: 0.3 }}>
+                <span key={index} style={{ fontSize: '1.5rem', opacity: 0.3 }}>
                   ⚪
                 </span>
               );
@@ -208,7 +242,7 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
           })}
         </div>
 
-        <span>Level {currentQuestionIndex + 1}</span>
+        <span style={{ fontSize: '26px', fontWeight: 'bold' }}>Level {currentQuestionIndex + 1}</span>
       </div>
       
       <div style={{ backgroundColor: '#333', padding: '20px', borderRadius: '8px', marginBottom: '20px', border: '4px solid #111' }}>
@@ -217,15 +251,15 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
         </h2>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '30px', alignItems: 'stretch', marginBottom: '30px' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', alignItems: 'stretch', marginBottom: '30px' }}>
         {/* Item Source */}
         <div style={{
-          width: '180px',
+          width: '215px', // Accommodates 5 columns (5 * 32px + 4 * 5px gap + 20px padding)
           height: '180px',
           backgroundColor: '#5ea243',
           border: '5px solid #373737',
           display: 'grid',
-          gridTemplateColumns: 'repeat(4, 32px)',
+          gridTemplateColumns: 'repeat(5, 32px)',
           gridTemplateRows: 'repeat(4, 32px)',
           gap: '5px',
           padding: '10px',
@@ -285,10 +319,10 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
           ))}
           <div style={{ 
             position: 'absolute', 
-            bottom: '-30px', 
+            bottom: '-40px', 
             left: '0',
             width: '100%', 
-            fontSize: '1rem', 
+            fontSize: '26px', 
             color: '#373737',
             textAlign: 'center',
             whiteSpace: 'nowrap'
@@ -366,12 +400,12 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
         {/* Chest */}
         <div 
           style={{
-            width: '180px',
+            width: '215px', // Accommodates 5 columns
             height: '180px',
             backgroundColor: '#866043',
             border: '5px solid #373737',
             display: 'grid',
-            gridTemplateColumns: 'repeat(4, 32px)',
+            gridTemplateColumns: 'repeat(5, 32px)',
             gridTemplateRows: 'repeat(4, 32px)',
             gap: '5px',
             padding: '10px',
@@ -425,10 +459,10 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
           ))}
           <div style={{ 
             position: 'absolute', 
-            bottom: '-30px', 
+            bottom: '-40px', 
             left: '0',
             width: '100%', 
-            fontSize: '1rem', 
+            fontSize: '26px', 
             color: '#373737',
             textAlign: 'center',
             whiteSpace: 'nowrap'
@@ -452,17 +486,24 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
         )}
       </div>
 
-      <button className="minecraft-btn" onClick={handleSubmit} disabled={!!feedback}>
-        Submit
-      </button>
-      
-      <button 
-        className="minecraft-btn" 
-        onClick={onCancel}
-        style={{ backgroundColor: '#a33', display: 'block', margin: '40px auto 0' }}
-      >
-        QUIT
-      </button>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
+        <button 
+          className="minecraft-btn" 
+          onClick={handleSubmit} 
+          disabled={!!feedback}
+          style={{ width: '150px' }}
+        >
+          Submit
+        </button>
+        
+        <button 
+          className="minecraft-btn" 
+          onClick={onCancel}
+          style={{ backgroundColor: '#a33', width: '150px' }}
+        >
+          QUIT
+        </button>
+      </div>
     </div>
   );
 };

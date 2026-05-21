@@ -56,31 +56,38 @@ const Results: React.FC<ResultsProps> = ({ result, onBackToMenu, onRestart }) =>
         <p>Time: {result.time} seconds</p>
       </div>
 
-      {!saved ? (
-        <div style={{ marginBottom: '30px' }}>
-          <p>Enter your name to save your score:</p>
-          <input 
-            type="text" 
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="PLAYER NAME"
-            disabled={saving}
-            style={{
-              fontSize: '1.2rem',
-              width: '80%',
-              border: '4px solid #373737',
-              padding: '10px',
-              fontFamily: 'inherit',
-              marginBottom: '10px'
-            }}
-          />
-          <br/>
-          <button className="minecraft-btn" onClick={handleSave} disabled={saving} style={{ fontSize: '1rem', opacity: saving ? 0.5 : 1 }}>
-            {saving ? 'SAVING...' : 'SAVE RECORD'}
-          </button>
-        </div>
+      {result.score > 3 ? (
+        !saved ? (
+          <div style={{ marginBottom: '30px' }}>
+            <p>Enter your name to save your score:</p>
+            <input 
+              type="text" 
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="PLAYER NAME"
+              disabled={saving}
+              style={{
+                fontSize: '1.2rem',
+                width: '80%',
+                border: '4px solid #373737',
+                padding: '10px',
+                fontFamily: 'inherit',
+                marginBottom: '10px'
+              }}
+            />
+            <br/>
+            <button className="minecraft-btn" onClick={handleSave} disabled={saving} style={{ fontSize: '1rem', opacity: saving ? 0.5 : 1 }}>
+              {saving ? 'SAVING...' : 'SAVE RECORD'}
+            </button>
+          </div>
+        ) : (
+          <p style={{ color: '#56ad36', marginBottom: '30px' }}>RECORD SAVED!</p>
+        )
       ) : (
-        <p style={{ color: '#56ad36', marginBottom: '30px' }}>RECORD SAVED!</p>
+        <div style={{ marginBottom: '30px', color: '#777' }}>
+          <p>Great effort!</p>
+          <p style={{ fontSize: '1rem' }}>Score 4 or more to save your name to the leaderboard.</p>
+        </div>
       )}
 
       <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
