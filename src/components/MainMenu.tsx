@@ -22,7 +22,7 @@ const MainMenu: React.FC<MainMenuProps> = ({ onStart, onLeaderboard }) => {
           onClick={onStart}
           style={{ width: '300px' }}
         >
-          PLAY
+          Play Game
         </button>
         <button 
           className="minecraft-btn" 
