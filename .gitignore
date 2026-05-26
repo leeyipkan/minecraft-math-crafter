@@ -27,3 +27,8 @@ dist-ssr
 server/node_modules
 server/leaderboard.json
 server/dist
+
+# Firebase / secrets
+.firebase/
+key.json
+*.json.key
