@@ -24,11 +24,9 @@ jobs:
       - run: npm ci
       - run: npm run build
       
-      - name: List files in the workspace
-        run: ls -la
-      
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: 'github-actions-deployer@minecraft-math-crafter.iam.gserviceaccount.com'
           projectId: minecraft-math-crafter
+          entryPoint: '.'
