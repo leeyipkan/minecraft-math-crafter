@@ -26,4 +26,6 @@ jobs:
       
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: 'github-actions-deployer@minecraft-math-crafter.iam.gserviceaccount.com'
           projectId: minecraft-math-crafter
