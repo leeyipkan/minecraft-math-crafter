@@ -14,7 +14,7 @@ const MainMenu: React.FC<MainMenuProps> = ({ onStart, onLeaderboard }) => {
         textShadow: '4px 4px #000',
         color: '#56ad36'
       }}>
-        RDR2GTA6
+        Math Crafter
       </h1>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
         <button 
@@ -22,7 +22,7 @@ const MainMenu: React.FC<MainMenuProps> = ({ onStart, onLeaderboard }) => {
           onClick={onStart}
           style={{ width: '300px' }}
         >
-          PLAY RDR2
+          PLAY GAME
         </button>
         <button 
           className="minecraft-btn" 
