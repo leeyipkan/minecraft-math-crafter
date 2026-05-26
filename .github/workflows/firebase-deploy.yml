@@ -15,9 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: List all files recursively
-        run: ls -laR
-
       - id: 'auth'
         uses: 'google-github-actions/auth@v1'
         with:
@@ -27,9 +24,14 @@ jobs:
       - run: npm ci
       - run: npm run build
       
+      - name: Copy Firebase config to dist
+        run: |
+          cp firebase.json dist/
+          cp .firebaserc dist/
+
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: 'github-actions-deployer@minecraft-math-crafter.iam.gserviceaccount.com'
           projectId: minecraft-math-crafter
-          entryPoint: '.'
+          entryPoint: 'dist' # Explicitly set the entry point to dist
