@@ -32,3 +32,6 @@ server/dist
 .firebase/
 key.json
 *.json.key
+
+# Temporary files
+output.txt
