@@ -24,14 +24,14 @@ jobs:
       - run: npm ci
       - run: npm run build
       
-      - name: Copy Firebase config to dist
-        run: |
-          cp firebase.json dist/
-          cp .firebaserc dist/
+      - name: Create firebase.json from Secret
+        run: echo "${{ secrets.FIREBASE_JSON_CONTENT }}" > firebase.json
+        
+      - name: Create .firebaserc from Secret
+        run: echo "${{ secrets.FIREBASERC_CONTENT }}" > .firebaserc
 
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: 'github-actions-deployer@minecraft-math-crafter.iam.gserviceaccount.com'
           projectId: minecraft-math-crafter
-          entryPoint: 'dist' # Explicitly set the entry point to dist
