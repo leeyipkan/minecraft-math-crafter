@@ -13,6 +13,16 @@ interface Question {
 }
 
 const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+        setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [results, setResults] = useState<boolean[]>([]);
@@ -71,9 +81,6 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
       } else if (i === 2) {
         // Level 3: First number 10-19, second number single digit, result single digit (Forces subtraction)
         type = 'SUB';
-        answer = Math.floor(Math.random() * 9) + 1; // Result: 1 to 9
-        const a = Math.floor(Math.random() * 10) + 10; // First number: 10 to 19
-        const b = a - answer; // Second number
         
         // Ensure b is a single digit (1-9). 
         // If a is 19 and answer is 9, b is 10 (invalid).
@@ -188,8 +195,27 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
   const chestSmall = chestValue % 10;
   const chestEmpty = maxCapacity - (chestLarge * 4 + chestSmall);
 
+  const gameAreaStyle: React.CSSProperties = {
+    display: 'flex',
+    justifyContent: 'center',
+    gap: isMobile ? '20px' : '40px',
+    alignItems: isMobile ? 'center' : 'stretch',
+    marginBottom: '30px',
+    flexDirection: isMobile ? 'column' : 'row'
+  };
+
+  const panelStyle: React.CSSProperties = {
+    width: '95%',
+    maxWidth: '1000px',
+    padding: isMobile ? '20px' : '40px',
+    textAlign: 'center',
+    position: 'relative',
+    height: '95vh',
+    overflowY: 'auto'
+  };
+
   return (
-    <div className="minecraft-panel" style={{ width: '95%', maxWidth: '1000px', padding: '40px', textAlign: 'center', position: 'relative' }}>
+    <div className="minecraft-panel" style={panelStyle}>
       {/* Feedback Overlay */}
       {feedback && !feedback.isCorrect && (
         <div style={{
@@ -252,7 +278,7 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
         </h2>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', alignItems: 'stretch', marginBottom: '30px' }}>
+      <div style={gameAreaStyle}>
         {/* Item Source */}
         <div style={{
           width: '247px', // Accommodates 6 columns (6 * 32px + 5 * 5px gap + 20px padding + 10px borders)
@@ -494,7 +520,7 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
         <button 
           className="minecraft-btn" 
           onClick={onCancel}
-          style={{ backgroundColor: '#a33', width: '150px' }}
+          style={{ backgroundColor: '#a33', width: isMobile ? '45%' : '150px' }}
         >
           QUIT
         </button>
@@ -503,7 +529,7 @@ const Game: React.FC<GameProps> = ({ onFinish, onCancel }) => {
           className="minecraft-btn" 
           onClick={handleSubmit} 
           disabled={!!feedback}
-          style={{ width: '150px' }}
+          style={{ width: isMobile ? '45%' : '150px' }}
         >
           Submit
         </button>
